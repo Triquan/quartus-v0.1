@@ -1,0 +1,15 @@
+module edge_button(
+    input  clk,
+    input  btn_n,   // active-low từ KEY
+    output reg pulse
+);
+    reg [2:0] s;
+    always @(posedge clk) s <= {s[1:0], ~btn_n}; // đảo vì active-low
+
+    wire pressed = &s;
+    reg pressed_d;
+    always @(posedge clk) begin
+        pressed_d <= pressed;
+        pulse     <= pressed & ~pressed_d;
+    end
+endmodule
