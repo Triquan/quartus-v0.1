@@ -1,0 +1,25 @@
+module duty_control (
+    input  clk,
+    input  KEY1_n,    // active-low: tăng duty
+    input  KEY2_n,    // active-low: giảm duty
+    input  KEY3_n,    // active-low: reset 50%
+    output reg [7:0] duty  // 0..255
+);
+    localparam STEP = 8; // bước thay đổi ≈3%
+
+    wire up_pulse, down_pulse, rst_pulse;
+    edge_button db_up   (.clk(clk), .btn_n(KEY1_n), .pulse(up_pulse));
+    edge_button db_down (.clk(clk), .btn_n(KEY2_n), .pulse(down_pulse));
+    edge_button db_rst  (.clk(clk), .btn_n(KEY3_n), .pulse(rst_pulse));
+
+    always @(posedge clk) begin
+        if (rst_pulse) duty <= 8'd128; // 50%
+        else if (up_pulse) begin
+            if (duty >= 255-STEP) duty <= 255;
+            else duty <= duty + STEP;
+        end else if (down_pulse) begin
+            if (duty <= STEP) duty <= 0;
+            else duty <= duty - STEP;
+        end
+    end
+endmodule
